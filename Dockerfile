@@ -51,7 +51,13 @@ RUN dotnet help
 
 # Copy notebooks
 
-COPY . ${HOME}/Module4/
+COPY . ${HOME}/Exercice1
+COPY . ${HOME}/Exercice2
+COPY . ${HOME}/Exercice3
+COPY . ${HOME}/Exercice4
+COPY . ${HOME}/Exercice5
+COPY . ${HOME}/Exercice6
+COPY . ${HOME}/Exercice7
 
 # Copy package sources
 
@@ -74,4 +80,4 @@ RUN dotnet try jupyter install
 ENV DOTNET_TRY_CLI_TELEMETRY_OPTOUT=false
 
 # Set root to Notebooks
-WORKDIR ${HOME}/Module4/
+WORKDIR ${HOME}
