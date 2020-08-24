@@ -1,6 +1,5 @@
 FROM jupyter/scipy-notebook:45f07a14b422
 
-# Install .NET CLI dependencies
 
 ARG NB_USER=jovyan
 ARG NB_UID=1000
@@ -14,7 +13,6 @@ USER root
 RUN apt-get update
 RUN apt-get install -y curl
 
-# Install .NET CLI dependencies
 RUN apt-get install -y --no-install-recommends \
         libc6 \
         libgcc1 \
@@ -26,7 +24,6 @@ RUN apt-get install -y --no-install-recommends \
 
 RUN rm -rf /var/lib/apt/lists/*
 
-# Install .NET Core SDK
 ENV DOTNET_SDK_VERSION 3.0.100
 
 RUN curl -SL --output dotnet.tar.gz https://dotnetcli.blob.core.windows.net/dotnet/Sdk/$DOTNET_SDK_VERSION/dotnet-sdk-$DOTNET_SDK_VERSION-linux-x64.tar.gz \
@@ -37,41 +34,22 @@ RUN curl -SL --output dotnet.tar.gz https://dotnetcli.blob.core.windows.net/dotn
     && rm dotnet.tar.gz \
     && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
 
-# Enable detection of running in a container
 ENV DOTNET_RUNNING_IN_CONTAINER=true \
-    # Enable correct mode for dotnet watch (only mode supported in a container)
     DOTNET_USE_POLLING_FILE_WATCHER=true \
-    # Skip extraction of XML docs - generally not useful within an image/container - helps performance
     NUGET_XMLDOC_MODE=skip \
-    # Opt out of telemetry until after we install jupyter when building the image, this prevents caching of machine id
     DOTNET_TRY_CLI_TELEMETRY_OPTOUT=true
 
-# Trigger first run experience by running arbitrary cmd
 RUN dotnet help
-
-# Copy notebooks
-
-COPY . ${HOME}
-
-# Copy package sources
-
-# COPY ./NuGet.config ${HOME}/nuget.config
 
 RUN chown -R ${NB_UID} ${HOME}
 USER ${USER}
 
-# Install Microsoft.DotNet.Interactive
 RUN dotnet tool install -g dotnet-try 
-#--add-source "https://dotnet.myget.org/F/dotnet-try/api/v3/index.json"
 
 ENV PATH="${PATH}:${HOME}/.dotnet/tools"
 RUN echo "$PATH"
 
-# Install kernel specs
 RUN dotnet try jupyter install
 
-# Enable telemetry once we install jupyter for the image
 ENV DOTNET_TRY_CLI_TELEMETRY_OPTOUT=false
 
-# Set root to Notebooks
-WORKDIR ${HOME}
